@@ -1,0 +1,675 @@
+---
+title: "Nica Dissertation"
+author: "Maddie Quam"
+date: "2024-07-11"
+output: html_document
+---
+# Chapter 3 Pragmatics
+## Noun-Modifier Task
+### Homesigners' Productions
+```{r}
+# Are homesigners more likely to produce modifiers on trials with a distractor?
+# Logistic mixed effects model
+##COMBINED N-MOD (march 2023 and jan 2024)
+N.Mod_reg_combined <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_combined.csv", na.strings="N/A")
+View(N.Mod_reg_combined)
+nmod <- subset(N.Mod_reg_combined, Response.Order=='initial')
+summary(nmod)
+#label variables
+Trial_Type <- as.factor(nmod$Trial.Type)
+Modifier_Pres <- nmod$Incl_Contrastive_Mod
+ID <- as.factor(nmod$Participant)
+levels(ID)
+List <-as.factor(nmod$List)
+Items <- as.factor(nmod$Item_Cat)
+levels(Item)
+Distractor <-nmod$Distractor_Present
+Run <- as.factor(nmod$Run)
+
+#null model
+model_null <- glmer(Modifier_Pres ~ 1 + (1|ID:Items:Run), data = nmod, family = binomial)
+summary(model_null)
+
+#model used
+model01 <- glmer(Modifier_Pres ~ Trial_Type + Run + (1|ID) + (1|Items), data=nmod, family = binomial) 
+summary(model01)
+jtools::summ(model01)
+stargazer(model01, type = "text")
+
+#alternate model
+model02 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID:Items:Run), data=nmod, family = binomial) 
+summary(model02)
+jtools::summ(model02)
+stargazer(model02, type = "text")
+
+#calculate odds ratio
+se <- sqrt(diag(vcov(model01)))
+# table of estimates with 95% CI
+(tab <- cbind(Est = fixef(model01), LL = fixef(model01) - 1.96 * se, UL = fixef(model01) + 1.96 * se))
+exp(tab)
+
+anova(model_null, model01)
+anova(model01, model02)
+anova(model_null, model02)
+#no sig diff btw model 01 and 02 but sig diff from null model (so presence of a distractor does have an effect)
+#model 01 has better fit (smaller AIC and BIC)
+
+sjPlot::tab_model(model01)
+
+#Bar Plot
+Prop_Mod <- c(.94, .56, .81, .25, .69, .20, .56, .75, .50, .56, .06, .63, .25, .33, .75, .64, .75, .69, .94, .56, .38, .69, .38, .38, .63, .50, .50, .31, .44, .38)
+Trial_Type <- c("D", "D", "D", "D", "D", "D", "D", "N", "N", "N", "N", "N", "N", "N", "D", "D", "D", "D", "D", "D", "D", "D", "N", "N", "N", "N", "N", "N", "N", "N")
+HS_ID <- c("02", "05", "18", "19", "20", "21", "22", "02", "05", "18", "19", "20", "21", "22", "02", "03", "05", "17", "18", "19", "20", "22", "02", "03", "05", "17", "18", "19", "20", "22")
+Run <- c("1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd")
+mod_com<- data.frame(HS_ID, Prop_Mod, Trial_Type, Run)
+summary(mod_com)
+
+run.labs <- c("First Run", "Second Run")
+names(run.labs) <- c("1st", "2nd")
+
+ggplot(data=mod_com, aes(x=HS_ID, y=Prop_Mod, fill=Trial_Type)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  geom_abline(slope=0, intercept=0.5,  col = "gray54",lty=2) +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16),
+        strip.text.y = element_text(size = 14, color = "grey20")) + 
+  scale_fill_manual(name="Trial Type", labels=c("with distractor", "no distractor"), 
+                    values=c( "chartreuse4", "darkorchid3")) + ylab("Percent of Trials with Modifiers Produced") + xlab("Homesigner") +
+  facet_grid(rows = vars(Run), labeller = labeller(Run = run.labs))
+
+```
+
+### Appendix B
+```{r}
+# First Run (March 2023)
+nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='First')
+summary(nmod)
+Trial_Type <- as.factor(nmod$Trial.Type)
+Modifier_Pres <- nmod$Incl_Contrastive_Mod
+ID <- as.factor(nmod$Participant)
+List <-as.factor(nmod$List)
+Items <- as.factor(nmod$Item_Cat)
+levels(Item)
+Distractor <-nmod$Distractor_Present
+
+#null model
+model_null <- glmer(Modifier_Pres ~ 1 + (1|ID:Items), data = nmod, family = binomial)
+summary(model_null)
+
+#alternate model
+model01 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID:Items), data=nmod, family = binomial) 
+summary(model01)
+jtools::summ(model01)
+stargazer(model01, type = "text")
+
+#model used
+model02 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID) + (1|Items), data=nmod, family = binomial) 
+summary(model02)
+jtools::summ(model02)
+
+#calculate odds ratio
+se <- sqrt(diag(vcov(model02)))
+# table of estimates with 95% CI
+(tab <- cbind(Est = fixef(model02), LL = fixef(model02) - 1.96 * se, UL = fixef(model02) + 1.96 * se))
+exp(tab)
+
+anova(model_null, model01)
+anova(model01, model02)
+anova(model_null, model02)
+#no sig diff btw model 01 and 02 but sig diff from null model (so presence of a distractor does have an effect)
+#model 02 has better fit (smaller AIC and BIC)
+
+sjPlot::tab_model(model03)
+
+
+
+# Second/Strict Run (Jan 2024)
+nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='Second')
+nmod <- subset(NMod_reg, Response.Order=='initial')
+summary(nmod)
+Trial_Type <- as.factor(nmod$Trial.Type)
+Modifier_Pres <- nmod$Incl_Contrastive_Mod
+ID <- as.factor(nmod$Participant)
+List <-as.factor(nmod$List)
+Items <- as.factor(nmod$Item_Cat)
+levels(Items)
+Distractor <-nmod$Distractor_Present
+
+#null model
+model_null <- glmer(Modifier_Pres ~ 1 + (1|ID:Items), data = nmod, family = binomial)
+summary(model_null)
+
+#alternate model
+model01 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID) + (1|Items), data=nmod, family = binomial) 
+summary(model01)
+jtools::summ(model01)
+
+#model used
+model02 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID:Items), data=nmod, family = binomial) 
+summary(model02)
+jtools::summ(model02)
+stargazer(model02, type = "text")
+
+#calculate odds ratio
+se <- sqrt(diag(vcov(model02)))
+# table of estimates with 95% CI
+(tab <- cbind(Est = fixef(model02), LL = fixef(model02) - 1.96 * se, UL = fixef(model02) + 1.96 * se))
+exp(tab)
+
+anova(model_null, model01)
+anova(model01, model02)
+anova(model_null, model02)
+#no sig diff btw model 01 and 02 but sig diff from null model (so presence of a distractor does have an effect)
+#model 02 has better fit (smaller AIC and BIC)
+
+sjPlot::tab_model(model02)
+```
+
+### Subsequent Productions
+```{r}
+#chi-square test
+Elements <- c("nouns only", "includes modifiers", "nouns only", "includes modifiers")
+Response_Order <- c("initial responses", "initial responses", "subsequent responses", "subsequent responses")
+Prop_Utterances <- c(.47, .53, .26, .74)
+N_Utterances <- c(221, 254, 31, 89)
+submod <- data.frame(Elements, Response_Order, Prop_Utterances, N_Utterances)
+submod
+
+# 2x2 table
+dt = matrix(c(221, 254, 31, 89), nrow = 2, ncol = 2, byrow = TRUE)
+rownames(dt) = c("initial responses", "subsequent responses")
+colnames(dt) = c("Nouns_only", "Incl_Modifiers")
+dt
+chisq.test(dt)
+
+#bar plot
+ggplot(data=submod, aes(x=Response_Order, y=Prop_Utterances, fill=Elements)) + theme_minimal() + ylim(0, 1) + geom_bar(stat="identity") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  scale_fill_manual(name="Elements Included", labels=c("modifiers (& nouns)", "nouns only"), 
+                    values=c("darkorange1", "blue")) + ylab("Proportion of Responses")
+
+```
+
+### Communication Partners' Comprehension
+```{r}
+#Does CP hearing status relate to comprehension?
+Comp <- c(.88, .81, .66, .88, .91, .66, .78, .78, .84, .41, .63, .66, .69, .69, .81)
+HS <- c("02", "03", "05", "17", "18", "19", "20", "22", "02", "05", "18", "19", "20", "21", "22")
+Hearing_Status <- c("H", "H", "H", "D", "D", "H", "H", "D", "H", "H", "D", "H", "D", "H", "D")
+Run <- c("Strict", "Strict","Strict","Strict","Strict","Strict","Strict","Strict", "First", "First","First","First","First","First","First")
+CP_COMP<- data.frame(Comp, HS, Hearing_Status, Run)
+CP_COMP
+
+deaf_CP <- c(.88, .91, .78, .63, .69, .81, NA, NA, NA)
+hearing_CP <- c(.88, .81, .66, .66, .78, .84, .41, .66, .69) 
+# Create a data frame
+my_data <- data.frame( 
+  group = rep(c("Deaf", "Hearing"), each = 9),
+  PropCorrect = c(deaf_CP,  hearing_CP))
+
+library(dplyr)
+group_by(my_data, group) %>%
+  summarise(
+    count = n(),
+    median = median(PropCorrect, na.rm = TRUE),
+    IQR = IQR(PropCorrect, na.rm = TRUE))
+chisq.test(Comp, Hearing_Status) #ns
+
+
+ggplot(data=my_data, mapping = aes(x=group, y=PropCorrect)) + geom_boxplot() +
+  geom_dotplot(dotsize=.9, binaxis = "y", stackdir = "center") + theme_minimal() + ylim(0, 1) +
+  stat_summary(fun=mean, geom="point", shape=18, size=8, color="red") +
+  theme(axis.text.x = element_text(color = "grey20", size = 20, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 20, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 22, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 20, hjust = .5, vjust = .5, face = "plain")) + 
+  ylab("Proportion of Correct Responses") + 
+  xlab("CP's hearing status")
+
+wilcox.test(deaf_CP, hearing_CP) #ns (p=0.05)
+
+#beeswarm deaf vs. hearing
+Task <- c("Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Events", "Events", "Events", "Events", "Events", "Events", "Events", "Events")
+CP_Status <- c("hearing", "hearing", "hearing", "hearing", "deaf", "deaf", "deaf", "deaf", "deaf", "deaf", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "deaf", "deaf", "deaf", "deaf")
+Prop_Correct <- c(.84, .41, .66, .69, .63, .69, .81, .88, .91, .78, .88, .81, .66, .66, .78, .28, .44, .28, .28, .39, .56, .44, .44)
+CP_Status <- as.factor(CP_Status)
+Task <- as.factor(Task)
+hearing <- data.frame(Task, CP_Status, Prop_Correct)
+hearing
+
+ggplot(data=hearing, mapping = aes(x= Task, y=Prop_Correct)) + geom_boxplot(aes(color=CP_Status), position = position_dodge(1)) +
+  geom_dotplot(position = position_dodge(1), dotsize=.8, binaxis = "y", stackdir = "center", aes(fill=CP_Status)) + theme_minimal() + ylim(0, 1) +
+  scale_fill_manual(name= "CP Hearing Status", values=c("brown2", "cadetblue")) +
+  scale_color_manual(name= "CP Hearing Status", values=c("brown2", "cadetblue")) + 
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 15, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 17, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 17, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 15), legend.title = element_text(color = "grey20", size = 17)) +
+  ylab("Proportion Correct") + xlab("Tasks") 
+```
+
+## Events Task
+### Homesigners Productions
+```{r}
+#are certain elements produced more often than others?
+#agent vs. action
+prop.test(x = c(120, 131), n = c(144, 144))
+#patient vs. action
+prop.test(x = c(117, 131), n = c(144, 144))
+#actions > patients; no sig diff btw agents and actions
+
+##plots
+HS_ID <- c("05", "22", "02", "18", "17", "20", "19", "21", "05", "22", "02", "18", "17", "20", "19", "21", "05", "22", "02", "18", "17", "20", "19", "21")
+HS_ID <- as.factor(HS_ID)
+Trials <- c(18, 18, 17, 17, 14, 11, 4, 0, 0, 0, 1, 1, 2, 7, 11, 4, 0, 0, 0, 0, 2, 0, 3, 14)
+Elements <- c("all 3 elements", "all 3 elements", "all 3 elements", "all 3 elements", "all 3 elements", "all 3 elements", "all 3 elements", "all 3 elements", "2 elements", "2 elements", "2 elements", "2 elements", "2 elements", "2 elements", "2 elements", "2 elements", "1 element", "1 element", "1 element", "1 element", "1 element", "1 element", "1 element", "1 element")
+Elements <- as.factor(Elements)
+Order <- c(8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3, 2, 1)
+events <-data.frame(HS_ID, Trials, Elements, Order)
+           
+ggplot(data=events, aes(x= reorder(HS_ID, -Order), y=Trials, fill=Elements)) + theme_minimal() + ylim(0, 18) + geom_bar(stat="identity") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 15, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 17, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 17, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 15), legend.title = element_text(color = "grey20", size = 17)) + 
+  scale_fill_manual(name="Elements Included", labels=c( "1 element", "2 elements", "all 3 elements"), 
+                    values=c("darkgray", "darkorchid3", "darkgreen")) + ylab("Initial Responses on Each Trial") + xlab("Participant")
+
+```
+
+### Error Analysis
+```{r}
+#are CPs more likely to choose a video with the correct characters and actions?
+#create matrix
+error = matrix(c(11, 14, 16, 16, 12, 12, 12, 16, 3, 2, 5, 7, 5, 4, 9, 2), nrow = 2, ncol = 8, byrow = TRUE)
+rownames(error) = c("correct char", "incorrect")
+colnames(error) = c("02", "05", "17", "18", "19", "20", "21", "22")
+error
+
+error = matrix(c(109, 37, 73, 73), nrow = 2, ncol = 2, byrow = TRUE)
+colnames(error) = c("correct char", "incorrect")
+rownames(error) = c("observed", "expected")
+error
+chisq.test(error)
+
+```
+
+### Factors that could influence comprehension
+```{r}
+#Does CP hearing status relate to comprehension?
+Task <- c("Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 1", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Noun-Modifier 2", "Events", "Events", "Events", "Events", "Events", "Events", "Events", "Events")
+CP_Status <- c("hearing", "hearing", "hearing", "hearing", "deaf", "deaf", "deaf", "deaf", "deaf", "deaf", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "hearing", "deaf", "deaf", "deaf", "deaf")
+Prop_Correct <- c(.84, .41, .66, .69, .63, .69, .81, .88, .91, .78, .88, .81, .66, .66, .78, .28, .44, .28, .28, .39, .56, .44, .44)
+CP_Status <- as.factor(CP_Status)
+Task <- as.factor(Task)
+hearing <- data.frame(Task, CP_Status, Prop_Correct)
+hearing
+
+hearing_events <- subset(hearing, Task=='Events')
+summary(hearing_events)
+hearing_events
+
+CP_status <- as.factor(initial_prod$CP_hearing_status)
+chisq.test(CP_status, initial_prod$Correct_Initial) #ns
+
+#create new "rating" column using if statement with multiple conditions
+ArgOrder$CP_status01 <- ifelse(ArgOrder$CP_hearing_status=="deaf", 1, 0)
+
+cor.test(initial_prod$CP_status01, initial_prod$Correct_Initial,  method = "spearman") #ns (p<0.05) rho=0.15
+fisher.test(table(initial_prod$CP_status01, initial_prod$Correct_Initial)) #ns
+
+wilcox.test(initial_prod$CP_status01 ~ initial_prod$Correct_Initial) #ns
+
+#plot
+ggplot(data=hearing_events, mapping = aes(x=CP_Status, y=Prop_Correct)) + geom_boxplot() +
+  geom_dotplot(dotsize=1, binaxis = "y", stackdir = "center") + theme_minimal() + ylim(0, 1) +
+  stat_summary(fun=mean, geom="point", shape=18, size=7, color="red") +
+  theme(axis.text.x = element_text(color = "grey20", size = 20, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 20, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 22, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 20, hjust = .5, vjust = .5, face = "plain")) + 
+  ylab("Proportion of Correct Responses") + 
+  xlab("CP's Hearing Status")
+
+# Data in two numeric vectors
+deaf_CP <- c(39, 56, 44, 44)
+hearing_CP <- c(28, 44, 28, 28) 
+# Create a data frame
+my_data <- data.frame( 
+  group = rep(c("Deaf", "Hearing"), each = 4),
+  PropCorrect = c(deaf_CP,  hearing_CP))
+print(my_data)
+library(dplyr)
+group_by(my_data, group) %>%
+  summarise(
+    count = n(),
+    median = median(PropCorrect, na.rm = TRUE),
+    IQR = IQR(PropCorrect, na.rm = TRUE))
+
+ggplot(data=my_data, mapping = aes(x=group, y=PropCorrect)) + geom_boxplot() +
+  geom_dotplot(dotsize=.9, binaxis = "y", stackdir = "center") + theme_minimal() + ylim(0, 100) +
+  stat_summary(fun=mean, geom="point", shape=18, size=8, color="red") +
+  theme(axis.text.x = element_text(color = "grey20", size = 20, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 20, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 22, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 22, hjust = .5, vjust = .5, face = "plain")) + 
+  ylab("Proportion of Correct Responses") + 
+  xlab("CP's hearing status")
+
+wilcox.test(deaf_CP, hearing_CP) #ns (p=0.05)
+
+#does CP age influence % correct?
+CP_Age <- data.frame(
+  "CP Correct" = c(.28, .44, .39, .56, .28, .44, .28, .44),
+  "CP Age" = c(37, 41, 32, 44, 23, 50, 37, 63),
+  row.names = c("NAHS02", "NAHS05", "NAHS17", "NAHS18", "NAHS19", "MAHS20", "NAHS21", "NAHS22"),
+  stringsAsFactors = FALSE)
+CP_Age
+cor.test(CP_Age$CP.Correct, CP_Age$CP.Age,  method = "spearman") #sig (p<0.05) rho=.76
+
+#does HS producing all 3 elements influence CP correct?
+correct = matrix(c(39, 60, 7, 38), nrow = 2, ncol = 2, byrow = TRUE)
+colnames(correct) = c("correct initial", "incorrect")
+rownames(correct) = c("all 3", "1 to 2")
+correct
+chisq.test(correct)
+
+#plot
+Elements <- c("All 3", "All 3", "1 to 2", "1 to 2")
+Elements <-as.factor(Elements)
+Responses <- c(.39, .61, .16, .84)
+Labels <- c("Correct Initial", "Not", "Correct Initial", "Not")
+Labels <- c("Correct", "Not", "Correct", "Not")
+events_corr <- data.frame(Elements, Responses, Labels)
+events_corr
+
+ggplot(data=events_corr, aes(x=Elements, y=Responses, fill=Labels)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(stat="identity") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  scale_fill_manual(name="Communication \nPartners' \nResponse", labels=c("Correct Initial", "Not"), 
+                    values=c("blue1", "red")) + ylab("Percent of Trials") + xlab("Elements Homesigner Included in Utterance")
+
+```
+
+# Chapter 4 Event Rep
+## Events Task
+### Argument Ordering
+```{r}
+argorder = matrix(c(49, 68, 58.5, 58.5), nrow = 2, ncol = 2, byrow = TRUE)
+colnames(argorder) = c("agent initial", "patient initial")
+rownames(argorder) = c("observed", "expected")
+argorder
+chisq.test(argorder)
+
+#character location and argument ordering
+charloc = matrix(c(30, 19, 22, 46), nrow = 2, ncol = 2, byrow = TRUE)
+colnames(charloc) = c("agent left", "patient left")
+rownames(charloc) = c("agent initial", "patient initial")
+charloc
+chisq.test(charloc)
+
+Arg_order <- c("agent initial", "patient initial", "agent initial", "patient initial")
+Arg_side <-c("agent left", "agent left", "patient left", "patient left")
+count <-c(30, 22, 19, 46)
+position <- data.frame(Arg_order, Arg_side, count)
+position
+ggplot(data=position, aes(x= Arg_side, y=count, fill=Arg_order)) + theme_minimal() +
+  geom_bar(position=position_dodge(), stat="identity") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  scale_fill_manual(name="Argument Order", labels=c( "agent initial", "patient initial"), 
+                    values=c("darkorange", "darkblue")) + ylab("Number of Utterances") + xlab("Character Position in Video")
+
+```
+
+### Use of Space
+```{r}
+space = matrix(c(16, 30, 53, 69), nrow = 2, ncol = 2, byrow = TRUE)
+colnames(space) = c("used space", "did not use space")
+rownames(space) = c("initial correct", "not correct")
+space
+chisq.test(space)
+
+HS_ID <-c("02", "05", "17", "18", "20", "22", "02", "05", "17", "18", "20", "22", "02", "05", "17", "18", "20", "22", "02", "05", "17", "18", "20", "22", "02", "05", "17", "18", "20", "22")
+HS_ID <- as.factor(HS_ID)
+Strategies <- c("HS as P", "HS as P", "HS as P", "HS as P", "HS as P", "HS as P", "Ex as P", "Ex as P", "Ex as P", "Ex as P", "Ex as P", "Ex as P", "UnID space", "UnID space", "UnID space", "UnID space", "UnID space", "UnID space", "Meaningful space", "Meaningful space", "Meaningful space", "Meaningful space", "Meaningful space", "Meaningful space", "BA Sh", "BA Sh", "BA Sh", "BA Sh", "BA Sh", "BA Sh")
+Strategies <- as.factor(Strategies)
+Count <- c(10, 3, 10, 2, 0, 2, 0, 0, 0, 0, 6, 6, 3, 0, 4, 0, 0, 4, 1, 0, 2, 0, 0, 3, 1, 0, 1, 0, 0, 2)
+space <- data.frame(HS_ID, Strategies, Count)
+space
+levels(Strategies)
+space$Strategies <- factor(space$Strategies, levels = c('HS as P', 'Ex as P', 'UnID space', 'Meaningful space', 'BA Sh'))
+
+HS_ID <-c("19", "19", "19", "19", "19", "21", "21", "21", "21", "21")
+HS_ID <- as.factor(HS_ID)
+Strategies <- c("HS as P", "HS as P", "Ex as P", "Ex as P", "UnID space", "UnID space", "Meaningful space", "Meaningful space", "BA Sh", "BA Sh")
+Strategies <- as.factor(Strategies)
+Count <-c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+spacenull <- data.frame(HS_ID = c("19", "19", "19", "19", "19", "21", "21", "21", "21", "21"), 
+                        Strategies = c("HS as P", "HS as P", "Ex as P", "Ex as P", "UnID space", "UnID space", "Meaningful space", "Meaningful space", "BA Sh", "BA Sh"), 
+                        Count = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+spacenull
+
+space_all <- rbind(space, spacenull)
+space_all
+
+levels(space_all$HS_ID)
+space_all$HS_ID <- factor(space_all$HS_ID, levels = c('02', '05', '17', '18', '19', '20', '21', '22'))
+
+ggplot(data=space_all, aes(x=HS_ID, y=Count, fill=Strategies)) + theme_minimal() +
+  geom_bar(stat="identity") +
+  theme(legend.box = "horizontal", legend.spacing.y = unit(0.3, "cm"),
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  guides(fill = guide_legend(byrow = TRUE)) +
+  scale_fill_manual(name="Spatial Strategies", labels=c("signer adopts \n  patient role", "signer assigns \n  experimenter \n  to patient role", "unidentified space/locus", "meaningful space/locus", "body angle shift"), 
+                    values=c("darkblue", "darkviolet", "chartreuse2", "darkgoldenrod1", "gray")) + ylab("Instances Using a Spatial Strategy") + xlab("Homesigner")
+
+
+Space <- c("spatial strategy present", "no spatial strategy", "spatial strategy present", "no spatial strategy")
+Space <- as.factor(Space)
+Response <-c("initial correct", "initial correct", "not correct", "not correct")
+Response <- as.factor(Response)
+Prop <- c(.23, .30, .77, .70)
+space_corr <- data.frame(Space, Response, Prop)
+
+ggplot(data=space_corr, aes(x=Space, y=Prop, fill=Response)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(stat="identity") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  scale_fill_manual(name="Communication \nPartners' Response", labels=c("Correct Initial", "Not"), 
+                    values=c("blue1", "red")) + ylab("Percent of Trials") 
+```
+
+## Eye Tracking
+```{r}
+#Group Observations
+eyetracking <- eyetracking_final_240318
+ID <- as.factor(eyetracking$Participant)
+MeanGaze <- as.numeric(eyetracking$Mean.AP.Gaze)
+TargetLocation <- as.factor(eyetracking$Target.Location)
+Correct <- as.numeric(eyetracking$Match)
+List <- as.factor(eyetracking$List)
+TrialN <- as.numeric(eyetracking$Trials)
+Trial <- as.factor(eyetracking$Trial)
+Block <- as.factor(eyetracking$Part)
+summary(eyetracking)
+
+model <- lmer(MeanGaze ~ TargetLocation + (1|ID))
+summary(model) 
+confint(model)
+ranef(model)
+jtools::summ(model)
+
+model_null <- lmer(MeanGaze ~ 1 + (1|ID))
+summary(model_null)
+jtools::summ(model_null)
+
+model03 <- lmer(MeanGaze ~ TargetLocation + (1|ID:List))
+summary(model03)
+jtools::summ(model03)
+
+model04 <- lmer(MeanGaze ~ TargetLocation + (1|ID:TrialN))
+summary(model04)
+jtools::summ(model04)
+
+model05 <- lmer(MeanGaze ~ IsTargetRight + (1|ID:Block))
+summary(model05)
+jtools::summ(model05)
+
+stargazer(model, type = "text")
+stargazer(model, model03, model04, type = "text")
+stargazer(model,  model_null, type = "text")
+stargazer(model,  model_null, model03, type = "text")
+anova(model, model_null, test = "F")
+anova(model, model1, test = "F")
+
+model01 <- glmer(IsTargetRight ~ MeanGaze + (1|ID), family = binomial)
+summary(model01)
+install.packages("jtools")
+library(jtools)
+
+#PLOTS
+HS_ID <-c("02", "03", "05", "17", "18", "19", "20", "22")
+HS_ID <- as.factor(HS_ID)
+prop_gaze <-c(.39, .48, .45, .44, .47, .42, .69, .53)
+gazeT  <- data.frame(HS_ID, prop_gaze)
+
+ggplot(data=gazeT, aes(x=HS_ID, y=prop_gaze)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity", color="aquamarine2", fill="aquamarine2") +  
+  geom_abline(slope=0, intercept=0.5,  col = "deeppink3",lty=2) +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  ylab("Proportion of Trials with Gaze to Target") + xlab("Homesigner")
+
+HS_ID <- c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22",	"Average", "02", "03",	"05",	"17",	"18",	"19",	"20",	"22",	"Average")
+HS_ID <- as.factor(HS_ID)
+Gaze <- c(0.25,	-0.29,	0.29,	0.19,	0.28,	0.55,	-0.57,	-0.64,	0.01, -0.2,	-0.33,	0.07,	-0.07,	0.15,	0.23,	0.19,	-0.56,	-0.05)
+Side <-c("Left", "Left", "Left", "Left", "Left", "Left", "Left", "Left", "Left", "Right", "Right", "Right", "Right", "Right", "Right", "Right", "Right", "Right")
+Side <- as.factor(Side)
+gazeside <- data.frame(HS_ID, Side, Gaze)
+gazeside
+
+ggplot(data=gazeside, aes(x=Side, y=Gaze, group=HS_ID)) + theme_minimal()  +
+  geom_line(aes(color=HS_ID), size=2) + geom_point(aes(color=HS_ID), size=3) + ylim(-.65, .65) +
+  geom_abline(slope=0, intercept=0,  col = "antiquewhite4",lty=2) +
+  scale_color_manual(name="Homesigner", labels=c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22",	"Average"), 
+                  values=c("darkgoldenrod1", "darkorange3", "darkgreen", "deepskyblue", "darkviolet", "chartreuse3", "deeppink1", "brown4", "red")) + 
+  ylab("Mean Gaze in Anticipatory Period\n(-1 Left to +1 Right)") + xlab("Target Side") +
+  theme(legend.position = "bottom", legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16))
+
+HS_ID <- c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22", "02", "03",	"05",	"17",	"18",	"19",	"20",	"22")
+HS_ID <- as.factor(HS_ID)
+TotalGaze <- c(0.53,	0.62,	0.47,	0.52,	0.41,	0.36,	0.51,	0.74, 0.47,	0.38,	0.53,	0.48,	0.59,	0.64,	0.49,	0.26)
+GazeD <-c("Left", "Left", "Left", "Left", "Left", "Left", "Left", "Left", "Right", "Right", "Right", "Right", "Right", "Right", "Right", "Right")
+GazeD <-as.factor(GazeD)
+TG <- data.frame(HS_ID, GazeD, TotalGaze)
+TG
+ggplot(data=TG, aes(x=HS_ID, y=TotalGaze, fill=GazeD)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  
+  geom_abline(slope=0, intercept=0.5,  col = "deeppink3",lty=2) +
+  theme(legend.position = "bottom", legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) + 
+  scale_fill_manual(name="Gaze Direction", labels=c("Left", "Right"), 
+                    values=c("darkblue", "darkorange2")) + ylab("Proportion of Time Looking During AP") + xlab("Homesigner")
+
+HS_ID <- c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22", "02", "03",	"05",	"17",	"18",	"19",	"20",	"22")
+HS_ID <- as.factor(HS_ID)
+Prop <-c(0.45,	0.47,	0.50,	0.42,	0.64,	0.48,	0.67,	0.50, 0.33,	0.50,	0.41,	0.45,	0.34,	0.37,	0.71,	0.55)
+Block <- c("B1", "B1", "B1", "B1", "B1", "B1", "B1", "B1", "B2", "B2", "B2", "B2", "B2", "B2", "B2", "B2")
+Block <- as.factor(Block)
+BC <- data.frame(HS_ID, Block, Prop)
+BC
+ggplot(data=BC, aes(x=HS_ID, y=Prop, fill=Block)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  
+  geom_abline(slope=0, intercept=0.5,  col = "deeppink3",lty=2) +
+  theme(legend.position = "bottom", legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 14.5, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_blank()) + 
+  scale_fill_manual(labels=c("Block 1", "Block 2"), 
+                    values=c("cyan2", "darkslateblue")) + ylab("Proportion of Trials with Correct Gaze Direction") + xlab("Homesigner")
+
+HS_ID <- c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22", "02", "03",	"05",	"17",	"18",	"19",	"20",	"22")
+HS_ID <- as.factor(HS_ID)
+Prop <-c(0.50,	0.40,	0.43,	0.37,	0.58,	0.38,	0.78,	0.59, 0.28,	0.57,	0.46,	0.46,	0.36,	0.44,	0.61,	0.46)
+Half <-c("1", "1", "1", "1", "1", "1", "1", "1", "2", "2", "2", "2", "2", "2", "2", "2")
+Half <- as.factor(Half)
+halves <- data.frame(HS_ID, Half, Prop)
+halves
+ggplot(data=halves, aes(x=HS_ID, y=Prop, fill=Half)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  
+  geom_abline(slope=0, intercept=0.5,  col = "deeppink3",lty=2) +
+  theme(legend.position = "bottom", legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 14.5, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_blank()) + 
+  scale_fill_manual(labels=c("1st half", "2nd half"), 
+                    values=c("deepskyblue2", "darkorchid4")) + ylab("Proportion of Trials with Correct Gaze Direction") + xlab("Homesigner")
+
+HS_ID <- c("02", "03",	"05",	"17",	"18",	"19",	"20",	"22", "02", "03",	"05",	"17",	"18",	"19",	"20",	"22")
+HS_ID <- as.factor(HS_ID)
+Prop <-c(0.70,	0.38,	0.33,	0.42,	0.80,	0.50,	0.75,	0.50, 0.25,	0.57,	0.67,	0.42,	0.50,	0.45,	0.58,	0.50, 0.36,	0.43,	0.50,	0.33,	0.44,	0.29,	0.80,	0.67, 0.31,	0.57,	0.31,	0.50,	0.23,	0.44,	0.63,	0.44)
+BH <-c("B1H1", "B1H1", "B1H1", "B1H1", "B1H1", "B1H1", "B1H1", "B1H1", "B1H2", "B1H2", "B1H2", "B1H2", "B1H2", "B1H2", "B1H2", "B1H2", "B2H1", "B2H1", "B2H1", "B2H1", "B2H1", "B2H1", "B2H1", "B2H1", "B2H2", "B2H2", "B2H2", "B2H2", "B2H2", "B2H2", "B2H2", "B2H2")
+BH <- as.factor(BH)
+cat4 <- data.frame(HS_ID, BH, Prop)
+cat4
+ggplot(data=cat4, aes(x=HS_ID, y=Prop, fill=BH)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  
+  geom_abline(slope=0, intercept=0.5,  col = "deeppink3",lty=2) +
+  theme(legend.position = "bottom", legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 14.5, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 13.5), legend.title = element_blank()) + 
+  scale_fill_manual(labels=c("block 1: 1st half", "block 1: 2nd half", "block 2: 1st half", "block 2: 2nd half"), 
+                    values=c("blue4", "deepskyblue1", "darkorchid4", "darkorchid1")) + ylab("Proportion of Trials with Correct Gaze Direction") + xlab("Homesigner")
+
+```
+
