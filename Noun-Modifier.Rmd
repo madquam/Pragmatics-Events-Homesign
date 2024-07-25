@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#upload data file and packages
+# upload data file and packages
 ```{r}
 N.Mod_reg_all <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_all.csv", na.strings="N/A")
 
