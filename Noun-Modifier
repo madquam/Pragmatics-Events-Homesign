@@ -1,7 +1,7 @@
 ### Noun-Modifier Paper Analyses
 
 #upload data file
-N.Mod_reg_combined <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_combined.csv", na.strings="N/A")
+N.Mod_reg_all <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_all.csv", na.strings="N/A")
 
 #packages
 library(tidyverse)
@@ -11,7 +11,7 @@ library(emmeans)
 ## First Run (March 2023)
 # subset data file to include first run only 
 # label variables
-nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='First')
+nmod <- subset(N.Mod_reg_all, Response.Order=='initial' & Run=='First')
 summary(nmod)
 Trial_Type <- as.factor(nmod$Trial.Type)
 Modifier_Pres <- nmod$Incl_Contrastive_Mod
@@ -86,7 +86,7 @@ ggplot(data=nmod1, aes(x=HS_ID, y=Prop_Mod, fill=Trial_Type)) + theme_minimal() 
 ## Second Run (Jan 2024)
 # subset data file to include first run only 
 # label variables
-nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='Second')
+nmod <- subset(N.Mod_reg_all, Response.Order=='initial' & Run=='Second')
 summary(nmod)
 Trial_Type <- as.factor(nmod$Trial.Type)
 Modifier_Pres <- nmod$Incl_Contrastive_Mod
