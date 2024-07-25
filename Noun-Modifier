@@ -1,0 +1,153 @@
+### Noun-Modifier Paper Analyses
+
+#upload data file
+N.Mod_reg_combined <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_combined.csv", na.strings="N/A")
+
+#packages
+library(tidyverse)
+library(lmer)
+library(emmeans)
+
+## First Run (March 2023)
+# subset data file to include first run only 
+# label variables
+nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='First')
+summary(nmod)
+Trial_Type <- as.factor(nmod$Trial.Type)
+Modifier_Pres <- nmod$Incl_Contrastive_Mod
+ID <- as.factor(nmod$Participant)
+List <-as.factor(nmod$List)
+Items <- as.factor(nmod$Item_Cat)
+levels(Item)
+
+# logistic mixed effect model
+# null model
+model_null <- glmer(Modifier_Pres ~ 1 + (1|ID) + (1|Items), data = nmod, family = binomial)
+summary(model_null)
+
+# model results
+model04 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID) + (1|Items), data=nmod, family = binomial) 
+summary(model04)
+jtools::summ(model04)
+sjPlot::tab_model(model04)
+
+#calculate odds ratio and confidence intervals
+se <- sqrt(diag(vcov(model04)))
+# table of estimates with 95% CI
+(tab <- cbind(Est = fixef(model04), LL = fixef(model04) - 1.96 * se, UL = fixef(model04) + 1.96 * se))
+# odds ratio
+exp(tab)
+# effect size
+model04.ef <- emmeans(model04, "Trial_Type")
+eff_size(model04.ef, sigma = sigma(model04), edf = Inf)
+
+#compare to null model
+anova(model_null, model04)
+
+## PLOTS
+# subsequent vs. initial
+Elements <- c("contrastive modifiers", "contrastive modifiers")
+Response_Order <- c("unsuccessful initial utterances", "subsequent utterances")
+Prop_Utterances <- c(.34, .66)
+submod1 <- data.frame(Elements, Response_Order, Prop_Utterances)
+submod1
+ggplot(data=submod1, aes(x=Response_Order, y=Prop_Utterances)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(stat="identity", fill = "deepskyblue3") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) +
+  ylab("Proportion of Responses with Contrastive Modifier") +
+  scale_x_discrete(limits = c("unsuccessful initial utterances", "subsequent utterances"))
+
+# contrastive modifier usage
+Prop_Mod <- c(.88, .38, .63, .06, .56, .19, .50, .31, .25, .44, .06, .31, .06, .31, .69, .64, .56, .69, .88, .56, .38, .69, .25, .38, .50, .50, .50, .31, .38, .38)
+Trial_Type <- c("D", "D", "D", "D", "D", "D", "D", "N", "N", "N", "N", "N", "N", "N", "D", "D", "D", "D", "D", "D", "D", "D", "N", "N", "N", "N", "N", "N", "N", "N")
+HS_ID <- c("A", "C", "E", "F", "G", "H", "I", "A", "C", "E", "F", "G", "H", "I", "A", "B", "C", "D", "E", "F", "G", "I", "A", "B", "C", "D", "E", "F", "G", "I")
+Run <- c("1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "1st", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd", "2nd")
+mod_com<- data.frame(HS_ID, Prop_Mod, Trial_Type, Run)
+summary(mod_com)
+
+nmod1 <- subset(mod_com, Run=='1st')
+ggplot(data=nmod1, aes(x=HS_ID, y=Prop_Mod, fill=Trial_Type)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  geom_abline(slope=0, intercept=0.5,  col = "gray54",lty=2) +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 15), legend.title = element_text(color = "grey20", size = 16),
+        strip.text.y = element_text(size = 15, color = "grey20")) + 
+  scale_fill_manual(name="Trial Type", labels=c("with competitor", "no competitor"), 
+                    values=c("chartreuse2", "darkgreen")) + ylab("Proportion of Trials with Contrastive Modifiers") + xlab("Homesigner")
+
+## Second Run (Jan 2024)
+# subset data file to include first run only 
+# label variables
+nmod <- subset(N.Mod_reg_combined, Response.Order=='initial' & Run=='Second')
+summary(nmod)
+Trial_Type <- as.factor(nmod$Trial.Type)
+Modifier_Pres <- nmod$Incl_Contrastive_Mod
+ID <- as.factor(nmod$Participant)
+List <-as.factor(nmod$List)
+Items <- as.factor(nmod$Item_Cat)
+levels(Items)
+
+# logistic mixed effect model
+# null model
+model_null <- glmer(Modifier_Pres ~ 1 + (1|ID) + (1|Items), data = nmod, family = binomial)
+summary(model_null)
+
+# model results
+model02 <- glmer(Modifier_Pres ~ Trial_Type + (1|ID) + (1|Items), data=nmod, family = binomial) 
+summary(model02)
+jtools::summ(model02)
+sjPlot::tab_model(model02)
+
+#calculate odds ratio and confidence intervals
+se <- sqrt(diag(vcov(model02)))
+# table of estimates with 95% CI
+(tab <- cbind(Est = fixef(model02), LL = fixef(model02) - 1.96 * se, UL = fixef(model02) + 1.96 * se))
+# odds ratio
+exp(tab)
+# effect size
+model02.ef <- emmeans(model02, "Trial_Type")
+eff_size(model02.ef, sigma = sigma(model02), edf = Inf)
+
+#model comparisons
+anova(model_null, model02)
+
+## PLOTS
+# subsequent vs. initial
+Elements <- c("contrastive modifiers", "contrastive modifiers")
+Response_Order <- c("unsuccessful initial utterances", "subsequent utterances")
+Prop_Utterances <- c(.40, .83)
+submod2 <- data.frame(Elements, Response_Order, Prop_Utterances)
+submod2
+ggplot(data=submod2, aes(x=Response_Order, y=Prop_Utterances)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(stat="identity", fill = "deepskyblue3") +
+  theme(legend.box = "horizontal",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 14), legend.title = element_text(color = "grey20", size = 16)) +
+  ylab("Proportion of Responses with Contrastive Modifier") +
+  scale_x_discrete(limits = c("unsuccessful initial utterances", "subsequent utterances"))
+
+# contrastive modifier usage
+nmod2 <- subset(mod_com, Run=='2nd')
+ggplot(data=nmod2, aes(x=HS_ID, y=Prop_Mod, fill=Trial_Type)) + theme_minimal() + ylim(0, 1) +
+  geom_bar(position=position_dodge(), stat="identity") +  geom_abline(slope=0, intercept=0.5,  col = "gray54",lty=2) +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "grey20", size = 14, hjust = .5, vjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 14, hjust = 1, vjust = 0, face = "plain"),
+        axis.title.x = element_text(color = "grey20", size = 16, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 16, hjust = .5, vjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 15), legend.title = element_text(color = "grey20", size = 16),
+        strip.text.y = element_text(size = 15, color = "grey20")) + 
+  scale_fill_manual(name="Trial Type", labels=c("with competitor", "no competitor"), 
+                    values=c("chartreuse2", "darkgreen")) + ylab("Proportion of Trials with Contrastive Modifiers") + xlab("Homesigner")
+
