@@ -9,20 +9,19 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#upload data file and packages
 ```{r}
-#upload data file
 N.Mod_reg_all <- read.csv("~/Documents/Research/NICA (PhD)/elan outputs/N-Mod/N-Mod_reg_all.csv", na.strings="N/A")
 
-#packages
 library(tidyverse)
 library(lme4)
 library(emmeans)
 ```
 
-```{r}
 ## First Run (March 2023)
 # subset data file to include first run only 
 # label variables
+```{r}
 nmod <- subset(N.Mod_reg_all, Response.Order=='initial' & Run=='First')
 summary(nmod)
 Trial_Type <- as.factor(nmod$Trial.Type)
@@ -31,8 +30,10 @@ ID <- as.factor(nmod$Participant)
 List <-as.factor(nmod$List)
 Items <- as.factor(nmod$Item_Cat)
 levels(Item)
+```
 
 # logistic mixed effect model
+```{r}
 # null model
 model_null <- glmer(Modifier_Pres ~ 1 + (1|ID) + (1|Items), data = nmod, family = binomial)
 summary(model_null)
@@ -57,8 +58,8 @@ eff_size(model04.ef, sigma = sigma(model04), edf = Inf)
 anova(model_null, model04)
 ```
 
+## PLOTS
 ```{r}
-#PLOTS first run
 # subsequent vs. initial
 Elements <- c("contrastive modifiers", "contrastive modifiers")
 Response_Order <- c("unsuccessful initial utterances", "subsequent utterances")
@@ -99,10 +100,10 @@ ggplot(data=nmod1, aes(x=HS_ID, y=Prop_Mod, fill=Trial_Type)) + theme_minimal() 
 
 ```
 
-```{r}
 ## Second Run (Jan 2024)
-# subset data file to include first run only 
+# subset data file to include second run only 
 # label variables
+```{r}
 nmod <- subset(N.Mod_reg_all, Response.Order=='initial' & Run=='Second')
 summary(nmod)
 Trial_Type <- as.factor(nmod$Trial.Type)
@@ -111,8 +112,10 @@ ID <- as.factor(nmod$Participant)
 List <-as.factor(nmod$List)
 Items <- as.factor(nmod$Item_Cat)
 levels(Items)
+```
 
 # logistic mixed effect model
+```{r}
 # null model
 model_null <- glmer(Modifier_Pres ~ 1 + (1|ID) + (1|Items), data = nmod, family = binomial)
 summary(model_null)
@@ -137,9 +140,8 @@ eff_size(model02.ef, sigma = sigma(model02), edf = Inf)
 anova(model_null, model02)
 ```
 
+# PLOTS
 ```{r}
-#PLOTS second run
-## PLOTS
 # subsequent vs. initial
 Elements <- c("contrastive modifiers", "contrastive modifiers")
 Response_Order <- c("unsuccessful initial utterances", "subsequent utterances")
